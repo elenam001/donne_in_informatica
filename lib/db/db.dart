@@ -27,35 +27,43 @@ class DatabaseHelper {
     const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
     const textType = 'TEXT NOT NULL';
 
-    await db.execute(
-      '''
+    // Creazione della tabella "donna"
+    await db.execute('''
       CREATE TABLE donna ( 
         id $idType, 
         nome $textType,
         description $textType
-      )
-
-      INSERT INTO donna [(id, nome, descrizione)]  
-      VALUES (1, Ada Lovelace, "Augusta Ada Byron, contessa di Lovelace, nacque il 10 dicembre 1815 a Londra, figlia del celebre poeta Lord Byron e di Anne Isabella Milbanke, un'aristocratica inglese appassionata di matematica. 
-
-      Fin dalla giovane età, Ada ricevette un'educazione rigorosa e completa, comprensiva di musica, lingue straniere e, soprattutto, matematica, grazie alla determinazione della madre di evitare che la figlia seguisse le orme artistiche del padre. Ada fu allieva della nota matematica e astronoma Mary Somerville, che le presentò il matematico Charles Babbage nel 1833. Questa presentazione segnò l'inizio di una collaborazione cruciale nella storia dell'informatica.
-
-      Babbage stava lavorando al progetto della sua Macchina Analitica, un calcolatore meccanico capace di eseguire qualsiasi calcolo matematico complesso. Ada fu profondamente affascinata dalla macchina e dalla sua potenziale applicazione. Nel 1842, Ada tradusse un articolo del matematico italiano Luigi Federico Menabrea che descriveva la Macchina Analitica. La traduzione fu arricchita con note estensive di suo pugno, che risultarono essere più dettagliate e lungimiranti dell'articolo stesso.
-
-      Le note di Ada Lovelace non si limitarono a spiegare il funzionamento della macchina, ma introdussero concetti che oggi sono fondamentali nell'informatica. Ada descrisse un algoritmo per calcolare i numeri di Bernoulli, il che le valse il titolo di "prima programmatrice" della storia. Le sue idee includevano l'uso di subroutine e iterazioni, elementi chiave nei moderni linguaggi di programmazione.
-
-      Ada immaginò che la Macchina Analitica potesse fare molto più che semplici calcoli numerici. Previde che potesse essere programmata per eseguire una varietà di compiti, come comporre musica o manipolare simboli. Questa visione prefigurava l'idea dei computer moderni come strumenti multifunzionali.
-
-      Nonostante non vide mai la Macchina Analitica costruita, Ada Lovelace lasciò un'eredità duratura nel campo dell'informatica. La sua capacità di vedere oltre le applicazioni immediate della macchina di Babbage e di immaginare un futuro in cui le macchine potessero svolgere una vasta gamma di compiti è stata fondamentale. Oggi, in suo onore, ogni anno si celebra l'Ada Lovelace Day, per riconoscere e commemorare i contributi delle donne nelle discipline STEM."
       );
+    ''');
 
+    // Creazione della tabella "collezionata"
+    await db.execute('''
       CREATE TABLE collezionata (
-        id $idType
+        id $idType,
         idDonna $idType
-      )
-      '''
-    );
+      );
+    ''');
+
+    // Inserimento dei dati nella tabella "donna"
+    await _insertInitialData(db);
   }
+
+  Future _insertInitialData(Database db) async {
+    await db.execute('''
+      INSERT INTO donna (nome, description) VALUES 
+      ('Ada Lovelace', 'Augusta Ada Byron, contessa di Lovelace, pioniera della programmazione.'),
+      ('Hedy Lamarr', 'Attrice e inventrice, brevettò un sistema di comunicazione segreta basato sul frequency hopping.'),
+      ('Barbara Liskov', 'Prima donna a conseguire un dottorato in Informatica negli USA, creatrice del linguaggio CLU.'),
+      ('Margaret Hamilton', 'Ingegnere del software per il programma Apollo della NASA, contribuì all\'allunaggio.'),
+      ('Grace Hopper', 'Pioniera dell\'informatica, sviluppò il primo compilatore per computer e contribuì allo sviluppo di COBOL.'),
+      ('Frances Elizabeth Allen', 'Prima donna a vincere il Premio Turing per i suoi contributi all\'ottimizzazione dei compilatori.'),
+      ('Fei-Fei Li', 'Professoressa di Stanford e creatrice di ImageNet, una risorsa chiave per il deep learning.'),
+      ('Shafi Goldwasser', 'Figura di spicco nella crittografia e nell\'informatica teorica, vincitrice del Turing Award.'),
+      ('Luigia Carlucci Aiello', 'Fondatrice dell\'intelligenza artificiale in Italia e promotrice di progetti di ricerca su sistemi intelligenti.'),
+      ('Code Girls', 'Oltre 10.000 donne americane reclutate per decifrare codici durante la Seconda Guerra Mondiale.');
+    ''');
+  }
+
   Future<int> insertCollected(Map<String, dynamic> row) async {
     final db = await instance.database;
 
@@ -65,20 +73,20 @@ class DatabaseHelper {
   Future<List<Map<String, dynamic>>> queryAllRows() async {
     final db = await instance.database;
 
-    return await db.query('items');
+    return await db.query('donna');
   }
 
   Future<int> update(Map<String, dynamic> row) async {
     final db = await instance.database;
     int id = row['id'];
 
-    return await db.update('items', row, where: 'id = ?', whereArgs: [id]);
+    return await db.update('donna', row, where: 'id = ?', whereArgs: [id]);
   }
 
   Future<int> delete(int id) async {
     final db = await instance.database;
 
-    return await db.delete('items', where: 'id = ?', whereArgs: [id]);
+    return await db.delete('donna', where: 'id = ?', whereArgs: [id]);
   }
 
   Future close() async {
