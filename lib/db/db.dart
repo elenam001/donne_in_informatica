@@ -36,16 +36,19 @@ class DatabaseHelper {
       );
     ''');
 
+
     // Creazione della tabella "collezionata"
     await db.execute('''
       CREATE TABLE collezionata (
-        id $idType,
-        idDonna $idType
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        idDonna INTEGER
       );
     ''');
 
+
     // Inserimento dei dati nella tabella "donna"
     await _insertInitialData(db);
+    
   }
 
   Future _insertInitialData(Database db) async {
@@ -54,15 +57,52 @@ class DatabaseHelper {
       ('Ada Lovelace', 'Augusta Ada Byron, contessa di Lovelace, pioniera della programmazione.'),
       ('Hedy Lamarr', 'Attrice e inventrice, brevettò un sistema di comunicazione segreta basato sul frequency hopping.'),
       ('Barbara Liskov', 'Prima donna a conseguire un dottorato in Informatica negli USA, creatrice del linguaggio CLU.'),
-      ('Margaret Hamilton', 'Ingegnere del software per il programma Apollo della NASA, contribuì all\'allunaggio.'),
-      ('Grace Hopper', 'Pioniera dell\'informatica, sviluppò il primo compilatore per computer e contribuì allo sviluppo di COBOL.'),
-      ('Frances Elizabeth Allen', 'Prima donna a vincere il Premio Turing per i suoi contributi all\'ottimizzazione dei compilatori.'),
+      ('Margaret Hamilton', 'Ingegnere del software per il programma Apollo della NASA, contribuì all''allunaggio.'),
+      ('Grace Hopper', 'Pioniera dell''informatica, sviluppò il primo compilatore per computer e contribuì allo sviluppo di COBOL.'),
+      ('Frances Elizabeth Allen', 'Prima donna a vincere il Premio Turing per i suoi contributi all''ottimizzazione dei compilatori.'),
       ('Fei-Fei Li', 'Professoressa di Stanford e creatrice di ImageNet, una risorsa chiave per il deep learning.'),
-      ('Shafi Goldwasser', 'Figura di spicco nella crittografia e nell\'informatica teorica, vincitrice del Turing Award.'),
-      ('Luigia Carlucci Aiello', 'Fondatrice dell\'intelligenza artificiale in Italia e promotrice di progetti di ricerca su sistemi intelligenti.'),
+      ('Shafi Goldwasser', 'Figura di spicco nella crittografia e nell''informatica teorica, vincitrice del Turing Award.'),
+      ('Luigia Carlucci Aiello', 'Fondatrice dell''intelligenza artificiale in Italia e promotrice di progetti di ricerca su sistemi intelligenti.'),
       ('Code Girls', 'Oltre 10.000 donne americane reclutate per decifrare codici durante la Seconda Guerra Mondiale.');
+
     ''');
   }
+
+  static Future<String> getDescription(String badgeName) async {
+    final db = await instance.database;
+
+
+    // Query the description from the "donna" table where "nome" matches the badge name
+    List<Map<String, dynamic>> result = await db.query(
+      'donna',
+      where: 'nome = ?',
+      whereArgs: [badgeName],
+    );
+
+    if (result.isNotEmpty) {
+      return result[0]['description']; // Return the description
+    } else {
+      return 'Descrizione non disponibile.'; // Fallback message
+    }
+  }
+
+  static Future<String> getShortDescription(String badgeName) async {
+  final db = await instance.database;
+  
+  // Query the description from the "donna" table where "nome" matches the badge name
+  List<Map<String, dynamic>> result = await db.query(
+    'donna',
+    where: 'nome = ?',
+    whereArgs: [badgeName],
+  );
+
+  if (result.isNotEmpty) {
+    String description = result[0]['description'];
+    return description.length > 50 ? description.substring(0, 50) + '...' : description;
+  } else {
+    return 'Descrizione non disponibile.';
+  }
+}
 
   Future<int> insertCollected(Map<String, dynamic> row) async {
     final db = await instance.database;

@@ -1,4 +1,213 @@
-import 'package:donne_e_informatica/view/profile.dart';
+import 'package:donne_e_informatica/db/db.dart' as db;
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
+
+  @override
+  HomePageState createState() => HomePageState();
+}
+
+class HomePageState extends State<HomePage> {
+  List<String> donne = [];
+  int collectedCount = 0;
+
+  final Map<String, int> badgeMap = {
+    'https://womenincs.math.unipd.it/orientamento-1.0/ada_lovelace': 1,
+    'https://womenincs.math.unipd.it/orientamento-1.0/hedy_lamarr': 2,
+    'https://womenincs.math.unipd.it/orientamento-1.0/barbara_liskov': 3,
+    'https://womenincs.math.unipd.it/orientamento-1.0/margaret_hamilton': 4,
+    'https://womenincs.math.unipd.it/orientamento-1.0/grace_hopper': 5,
+    'https://womenincs.math.unipd.it/orientamento-1.0/frances_elizabeth_allen': 6,
+    'https://womenincs.math.unipd.it/orientamento-1.0/fei_fei_li': 7,
+    'https://womenincs.math.unipd.it/orientamento-1.0/shafi_goldwasser': 8,
+    'https://womenincs.math.unipd.it/orientamento-1.0/luigia_carlucci_aiello': 9,
+    'https://womenincs.math.unipd.it/orientamento-1.0/code_girls': 10,
+  };
+
+  final Map<int, String> badgeNames = {
+    1: 'Ada Lovelace',
+    2: 'Hedy Lamarr',
+    3: 'Barbara Liskov',
+    4: 'Margaret Hamilton',
+    5: 'Grace Hopper',
+    6: 'Frances Elizabeth Allen',
+    7: 'Fei-Fei Li',
+    8: 'Shafi Goldwasser',
+    9: 'Luigia Carlucci Aiello',
+    10: 'Code Girls',
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _loadItems(); // Load collected badges when the HomePage initializes
+  }
+
+  Future<void> _loadItems() async {
+    final prefs = await SharedPreferences.getInstance();
+    donne = prefs.getStringList('collected_badges') ?? [];
+    setState(() {
+      collectedCount = donne.length;
+      print('Numero di badge trovati aggiornato: $collectedCount');
+    });
+  }
+
+  Future<void> addCollected(String scannedData) async {
+    print("QR Code scansionato: $scannedData");
+
+    int? idDonna = badgeMap[scannedData];
+
+    if (idDonna != null && badgeNames.containsKey(idDonna)) {
+      String badgeName = badgeNames[idDonna]!;
+
+      print("Badge riconosciuto: $badgeName");
+
+      if (!donne.contains(badgeName)) {
+        donne.add(badgeName);
+
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setStringList('collected_badges', donne);
+
+        setState(() {
+          collectedCount = donne.length;  // This should trigger the UI update
+        });
+
+        _showBadgeAcquiredDialog(context, badgeName);
+      } else {
+        print("Badge già raccolto!");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Hai già acquisito questo badge!')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('QR code non valido!')),
+      );
+    }
+  }
+
+  void _showBadgeAcquiredDialog(BuildContext context, String badgeName) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Badge Acquisito!'),
+          content: Text('Hai acquisito il badge: $badgeName!'),
+          actions: [
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+  Map<String, bool> isExpandedMap = {};
+
+  Widget _buildListItem(String title) {
+    return FutureBuilder<String>(
+      future: db.DatabaseHelper.getDescription(title),
+      builder: (context, snapshot) {
+        String fullDescription = snapshot.data ?? 'Descrizione non disponibile';
+        
+        return FutureBuilder<String>(
+          future: db.DatabaseHelper.getShortDescription(title),
+          builder: (context, shortSnapshot) {
+            String shortDescription = shortSnapshot.data ?? 'Breve descrizione non disponibile';
+
+            bool isExpanded = isExpandedMap[title] ?? false;
+
+            return ExpansionTile(
+              backgroundColor: const Color.fromARGB(255, 130, 29, 29).withOpacity(0.1),
+              collapsedBackgroundColor: const Color.fromARGB(255, 130, 29, 29).withOpacity(0.1),
+              collapsedShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              onExpansionChanged: (expanded) {
+                setState(() {
+                  isExpandedMap[title] = expanded;
+                });
+              },
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  if (!isExpanded) // Show the short description only if not expanded
+                    Text(
+                      shortDescription,
+                      style: const TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
+                    ),
+                ],
+              ),
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Text(fullDescription, style: const TextStyle(fontSize: 16)),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 32),
+            const Text(
+              'Benvenuto!',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                const Icon(
+                  Icons.person_2,
+                  size: 90,
+                ),
+                Text(
+                  'Carte trovate \n $collectedCount/10',
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const Divider(height: 5, thickness: 2),
+            Expanded(
+              child: ListView.builder(
+                itemCount: donne.length,
+                itemBuilder: (context, index) {
+                  return _buildListItem(donne[index]);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}/*
+import 'package:donne_e_informatica/db/db.dart' as db;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Usa shared_preferences per il web
 
@@ -10,7 +219,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List<String> donne = [];
   int collectedCount = 0;
-  int _selectedIndex = 0; // Indice della pagina selezionata
 
   // Mappa per associare QR code ID ai badge
   final Map<String, int> badgeMap = {
@@ -19,12 +227,10 @@ class _HomePageState extends State<HomePage> {
     'https://womenincs.math.unipd.it/orientamento-1.0/barbara_liskov': 3,
     'https://womenincs.math.unipd.it/orientamento-1.0/margaret_hamilton': 4,
     'https://womenincs.math.unipd.it/orientamento-1.0/grace_hopper': 5,
-    'https://womenincs.math.unipd.it/orientamento-1.0/frances_elizabeth_allen':
-        6,
+    'https://womenincs.math.unipd.it/orientamento-1.0/frances_elizabeth_allen': 6,
     'https://womenincs.math.unipd.it/orientamento-1.0/fei_fei_li': 7,
     'https://womenincs.math.unipd.it/orientamento-1.0/shafi_goldwasser': 8,
-    'https://womenincs.math.unipd.it/orientamento-1.0/luigia_carlucci_aiello':
-        9,
+    'https://womenincs.math.unipd.it/orientamento-1.0/luigia_carlucci_aiello': 9,
     'https://womenincs.math.unipd.it/orientamento-1.0/code_girls': 10,
   };
 
@@ -83,13 +289,13 @@ class _HomePageState extends State<HomePage> {
       } else {
         print("Badge già raccolto!");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Hai già acquisito questo badge!')),
+          const SnackBar(content: Text('Hai già acquisito questo badge!')),
         );
       }
     } else {
       // Mostra un messaggio di errore se il QR code non è valido
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('QR code non valido!')),
+        const SnackBar(content: Text('QR code non valido!')),
       );
     }
   }
@@ -100,14 +306,47 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Badge Acquisito!'),
+          title: const Text('Badge Acquisito!'),
           content: Text('Hai acquisito il badge: $badgeName!'),
           actions: [
             TextButton(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop(); // Chiudi il dialog
               },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildListItem(String title) {
+    return FutureBuilder<String>(
+      future: db.DatabaseHelper.getDescription(title), // Fetch the full description from the DB
+      builder: (context, snapshot) {
+        String fullDescription = snapshot.data ?? 'Descrizione non disponibile';
+
+        return ExpansionTile(
+          backgroundColor: const Color.fromARGB(255, 238, 238, 238).withOpacity(0.5),
+          collapsedBackgroundColor: const Color.fromARGB(255, 238, 238, 238).withOpacity(0.5),
+          collapsedShape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Text(
+                fullDescription, // Show the full description when expanded
+                style: const TextStyle(fontSize: 16),
+              ),
             ),
           ],
         );
@@ -122,106 +361,57 @@ class _HomePageState extends State<HomePage> {
     _addCollected(simulatedQRCode); // Simula l'acquisizione del badge
   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    if (index == 0) {
-      _loadItems(); // Aggiorna la pagina quando si clicca sulla Home
-    } else if (index == 1) {
-      _simulateQRCodeScan(); // Simula la scansione del QR
-    } else if (index == 2) {
-      Navigator.of(context)
-          .push(MaterialPageRoute(builder: (context) => AccountPage()));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Home'),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Ciao User!',
+            const SizedBox(height: 32),
+            const Text(
+              'Benvenuto!',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Row(
               children: [
-                _buildCard(
-                    'Carte trovate',
-                    '$collectedCount/10',
-                    Icons
-                        .person), // Mostra il conteggio aggiornato dei badge trovati
-                SizedBox(width: 16),
-                _buildCard('Altro?', '3/10', Icons.info),
+                const Icon(
+                  Icons.person_2,
+                  size: 90,
+                  ),
+                Text('Carte trovate \n $collectedCount/10', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)), // Mostra il conteggio aggiornato dei badge trovati
+                const SizedBox(width: 16),
               ],
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 8),
+            const Divider(
+                height: 5,
+                thickness: 2,
+                indent: 12,
+                endIndent: 12,
+              ),
+            const SizedBox(height: 8),
             Expanded(
               child: ListView.builder(
                 itemCount: donne.length,
                 itemBuilder: (context, index) {
-                  return _buildListItem(donne[index], 'Descrizione del badge');
+                  return _buildListItem(donne[index]);
                 },
               ),
             ),
-            ElevatedButton(
+            /*ElevatedButton(
               onPressed: _simulateQRCodeScan, // Simula lo scan del QR code
               child: Text('Simula Scansione QR'),
-            ),
+            ),*/
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.camera_alt),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: '',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.red,
-        onTap: _onItemTapped,
-      ),
     );
   }
-
-  // Costruisce una card per mostrare il titolo e il sottotitolo
-  Widget _buildCard(String title, String subtitle, IconData icon) {
-    return Expanded(
-      child: Card(
-        child: Container(
-          padding: EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Icon(icon, size: 48),
-              SizedBox(height: 8),
-              Text(title, style: TextStyle(fontSize: 18)),
-              SizedBox(height: 4),
-              Text(subtitle),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
+*/
+/*
   // Costruisce un elemento della lista per i dettagli dei badge trovati
   Widget _buildListItem(String title, String subtitle) {
     return Card(
@@ -239,5 +429,5 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
-  }
-}
+  }*/
+
