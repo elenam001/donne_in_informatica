@@ -41,7 +41,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE collezionata (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        idDonna INTEGER
+        nome $textType
       );
     ''');
 
@@ -67,6 +67,28 @@ class DatabaseHelper {
 
     ''');
   }
+
+  Future<bool> isBadgeCollected(String badgeName) async {
+    final db = await instance.database;
+    List<Map<String, dynamic>> result = await db.query(
+      'collezionata',
+      where: 'nome = ?',
+      whereArgs: [badgeName],
+    );
+    return result.isNotEmpty;
+  }
+
+  Future<void> addCollectedBadge(String badgeName) async {
+    final db = await instance.database;
+    await db.insert('collezionata', {'nome': badgeName});
+  }
+
+  Future<List<String>> getCollectedBadges() async {
+    final db = await instance.database;
+    List<Map<String, dynamic>> result = await db.query('collezionata');
+    return result.map((row) => row['nome'] as String).toList();
+  }
+
 
   static Future<String> getDescription(String badgeName) async {
     final db = await instance.database;
