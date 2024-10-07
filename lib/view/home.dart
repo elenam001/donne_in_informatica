@@ -1,6 +1,6 @@
 import 'package:donne_e_informatica/db/db.dart' as db;
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
@@ -30,17 +30,28 @@ class HomePageState extends State<HomePage> {
       future: db.DatabaseHelper.getDescription(title),
       builder: (context, snapshot) {
         String fullDescription = snapshot.data ?? 'Descrizione non disponibile';
-        return ExpansionTile(
-          title: Text(
-            title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        return Card(
+          color: Colors.white, // Colore di sfondo del card bianco
+          shape: RoundedRectangleBorder(
+            side: const BorderSide(
+                color: Color.fromARGB(255, 130, 29, 29),
+                width: 2), // Bordo rosso scuro
+            borderRadius: BorderRadius.circular(8.0),
           ),
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: Text(fullDescription, style: const TextStyle(fontSize: 16)),
+          child: ExpansionTile(
+            title: Text(
+              title,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-          ],
+            children: <Widget>[
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child:
+                    Text(fullDescription, style: const TextStyle(fontSize: 16)),
+              ),
+            ],
+          ),
         );
       },
     );
@@ -49,6 +60,7 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white, // Sfondo bianco dell'intera pagina
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -60,17 +72,32 @@ class HomePageState extends State<HomePage> {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                const Icon(
-                  Icons.badge,
-                  size: 90,
-                ),
-                Text(
-                  'Badge trovati \n $collectedCount/10',
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-              ],
+            // Riquadro per "Badge trovati" colorato interamente di rosso scuro
+            Container(
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(
+                    255, 130, 29, 29), // Sfondo rosso scuro
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.badge,
+                    size: 90,
+                    color: Colors.white, // Icona bianca
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    'Badge trovati \n $collectedCount/10',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white, // Testo bianco
+                    ),
+                  ),
+                ],
+              ),
             ),
             const Divider(height: 5, thickness: 2),
             Expanded(
@@ -78,7 +105,8 @@ class HomePageState extends State<HomePage> {
                   ? const Center(
                       child: Text(
                         'Inizia a collezionare i badge cercando i pannelli all\'interno del dipartimento',
-                        style: TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
+                        style: TextStyle(
+                            fontSize: 18, fontStyle: FontStyle.italic),
                         textAlign: TextAlign.center,
                       ),
                     )
@@ -95,5 +123,3 @@ class HomePageState extends State<HomePage> {
     );
   }
 }
-
-

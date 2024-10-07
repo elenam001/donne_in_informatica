@@ -38,10 +38,12 @@ class _NavigationState extends State<Navigation> {
       'https://womenincs.math.unipd.it/orientamento-1.0/barbara_liskov': 3,
       'https://womenincs.math.unipd.it/orientamento-1.0/margaret_hamilton': 4,
       'https://womenincs.math.unipd.it/orientamento-1.0/grace_hopper': 5,
-      'https://womenincs.math.unipd.it/orientamento-1.0/frances_elizabeth_allen': 6,
+      'https://womenincs.math.unipd.it/orientamento-1.0/frances_elizabeth_allen':
+          6,
       'https://womenincs.math.unipd.it/orientamento-1.0/fei_fei_li': 7,
       'https://womenincs.math.unipd.it/orientamento-1.0/shafi_goldwasser': 8,
-      'https://womenincs.math.unipd.it/orientamento-1.0/luigia_carlucci_aiello': 9,
+      'https://womenincs.math.unipd.it/orientamento-1.0/luigia_carlucci_aiello':
+          9,
       'https://womenincs.math.unipd.it/orientamento-1.0/code_girls': 10,
     };
 
@@ -62,7 +64,8 @@ class _NavigationState extends State<Navigation> {
     if (idDonna != null && badgeNames.containsKey(idDonna)) {
       String badgeName = badgeNames[idDonna]!;
 
-      bool alreadyCollected = await db.DatabaseHelper.instance.isBadgeCollected(badgeName);
+      bool alreadyCollected =
+          await db.DatabaseHelper.instance.isBadgeCollected(badgeName);
 
       if (!alreadyCollected) {
         await db.DatabaseHelper.instance.addCollectedBadge(badgeName);
@@ -86,8 +89,11 @@ class _NavigationState extends State<Navigation> {
     return Scaffold(
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: const Color.fromARGB(255, 130, 29, 29),
-        unselectedItemColor: Colors.grey,
+        backgroundColor:
+            const Color.fromARGB(255, 130, 29, 29), // Sfondo rosso scuro
+        selectedItemColor: Colors.white, // Icona e testo selezionati bianchi
+        unselectedItemColor:
+            Colors.white, // Icona e testo non selezionati bianchi
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             activeIcon: Icon(Icons.home),
