@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
-import 'home.dart'; // Assicurati che questo file esista
+/*import 'package:flutter/material.dart';
+import 'home.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:donne_e_informatica/db/db.dart'; // Assicurati che questo file esista
+import 'package:donne_e_informatica/db/db.dart'; 
 
 class AccountPage extends StatefulWidget {
   @override
@@ -9,7 +9,7 @@ class AccountPage extends StatefulWidget {
 }
 
 class _AccountPageState extends State<AccountPage> {
-  int _selectedIndex = 2; // Profilo selezionato di default
+  int _selectedIndex = 2;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -17,21 +17,18 @@ class _AccountPageState extends State<AccountPage> {
     });
 
     if (index == 0) {
-      // Naviga alla HomePage
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => HomePage()));
     } else if (index == 1) {
-      // Apre lo scanner QR
       _scanQRCode();
     } else if (index == 2) {
-      // Resta nella pagina AccountPage (se già selezionata)
     }
   }
 
   void _scanQRCode() {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) =>
-          QRViewScreen(), // QRViewScreen è l'implementazione dello scanner QR
+          QRViewScreen(),
     ));
   }
 
@@ -83,7 +80,6 @@ class _AccountPageState extends State<AccountPage> {
         title: Text(title, style: TextStyle(fontSize: 18)),
         trailing: Icon(trailingIcon),
         onTap: () {
-          // Azione di tap su ciascun elemento (da implementare se necessario)
         },
       ),
     );
@@ -99,7 +95,6 @@ class QRViewScreen extends StatelessWidget {
         onDetect: (barcode, args) {
           final String? code = barcode.rawValue;
           if (code != null) {
-            // Gestisci il QR code scannerizzato qui
             print('QR Code trovato: $code');
           }
         },
@@ -111,3 +106,4 @@ class QRViewScreen extends StatelessWidget {
 void main() => runApp(MaterialApp(
       home: AccountPage(),
     ));
+*/

@@ -44,13 +44,10 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
         onDetect: (barcode, args) async {
           if (barcode.rawValue != null) {
             final String code = barcode.rawValue!;
-            
-            widget.onScanned(code); // Pass scanned code to HomePage
-
-            await Future.delayed(Duration(milliseconds: 500)); // Add a small delay
-            
-            if (mounted) { // Check if the widget is still in the widget tree
-              Navigator.pop(context); // Close scanner after scanning
+            widget.onScanned(code);
+            await Future.delayed(Duration(milliseconds: 500)); 
+            if (mounted) { 
+              Navigator.pop(context);
             }
           }
         }

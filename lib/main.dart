@@ -5,19 +5,17 @@ import 'package:flutter/foundation.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart'; // Per il supporto Web
 
 void main() {
-  // Inizializza il database per le piattaforme desktop
   if (!kIsWeb &&
       (defaultTargetPlatform == TargetPlatform.windows ||
           defaultTargetPlatform == TargetPlatform.linux ||
           defaultTargetPlatform == TargetPlatform.macOS)) {
-    sqfliteFfiInit(); // Inizializza Sqflite FFI per desktop
-    databaseFactory = databaseFactoryFfi; // Imposta databaseFactory per desktop
+    sqfliteFfiInit(); 
+    databaseFactory = databaseFactoryFfi;
   }
 
-  // Inizializza il database per il Web
   if (kIsWeb) {
     databaseFactory =
-        databaseFactoryFfiWeb; // Imposta databaseFactory per il Web
+        databaseFactoryFfiWeb;
   }
 
   runApp(MyApp());

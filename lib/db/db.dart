@@ -50,7 +50,7 @@ class DatabaseHelper {
     await _insertInitialData(db);
     
   }
-
+//TODO inserire testo completo per ogni persona
   Future _insertInitialData(Database db) async {
     await db.execute('''
       INSERT INTO donna (nome, description) VALUES 
@@ -92,9 +92,6 @@ class DatabaseHelper {
 
   static Future<String> getDescription(String badgeName) async {
     final db = await instance.database;
-
-
-    // Query the description from the "donna" table where "nome" matches the badge name
     List<Map<String, dynamic>> result = await db.query(
       'donna',
       where: 'nome = ?',
@@ -102,16 +99,15 @@ class DatabaseHelper {
     );
 
     if (result.isNotEmpty) {
-      return result[0]['description']; // Return the description
+      return result[0]['description'];
     } else {
-      return 'Descrizione non disponibile.'; // Fallback message
+      return 'Descrizione non disponibile.';
     }
   }
 
   static Future<String> getShortDescription(String badgeName) async {
   final db = await instance.database;
   
-  // Query the description from the "donna" table where "nome" matches the badge name
   List<Map<String, dynamic>> result = await db.query(
     'donna',
     where: 'nome = ?',
@@ -120,7 +116,7 @@ class DatabaseHelper {
 
   if (result.isNotEmpty) {
     String description = result[0]['description'];
-    return description.length > 50 ? description.substring(0, 50) + '...' : description;
+    return description.length > 50 ? '${description.substring(0, 50)}...' : description;
   } else {
     return 'Descrizione non disponibile.';
   }
